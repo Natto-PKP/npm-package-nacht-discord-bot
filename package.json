@@ -1,0 +1,39 @@
+{
+  "name": "@natchy/discord-bot",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Natto-PKP/npm-package-nacht-discord-bot.git"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "prepublish": "npm run build",
+    "test": "jest",
+    "docs": "typedoc src/index.ts --out docs --plugin typedoc-plugin-markdown"
+  },
+  "license": "ISC",
+  "dependencies": {
+    "@natchy/utils": "^0.0.2",
+    "discord.js": "^14.14.1"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^8.49.0",
+    "eslint-plugin-jest": "^27.9.0",
+    "jest": "^29.7.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.7.1",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.8.1",
+    "ts-node-dev": "^2.0.0",
+    "tslib": "^2.5.0",
+    "typedoc": "^0.25.9",
+    "typedoc-plugin-markdown": "^3.17.1",
+    "typescript": "^5.2.2"
+  }
+}

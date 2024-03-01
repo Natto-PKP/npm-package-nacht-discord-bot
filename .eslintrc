@@ -1,0 +1,46 @@
+{
+  "root": true, // Don't look for other config files
+
+  "overrides": [
+    {
+      "files": ["**/*.ts", "**/*.d.ts"], // What files to apply this config to
+      "excludedFiles": ["**/*.test.ts"], // What files to ignore
+      "env": { "node": true }, // Enable Node.js global variables & Node.js scoping
+      "plugins": ["@typescript-eslint"], // Enable TypeScript-specific rules
+      "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"], // Enable recommended rules
+      "parser": "@typescript-eslint/parser", // Use TypeScript parser
+      "parserOptions": {
+        "sourceType": "module", // Allow `import` and `export`
+        "project": "tsconfig.json" // Look for TypeScript config in this file
+      },
+      "rules": {
+        "import/no-cycle": 0, // Disable import cycle checking
+        "linebreak-style": ["error", "windows"], // Enforce Windows line endings
+        "import/prefer-default-export": "off" // Disable `export default` checking
+      }
+    },
+    {
+      "files": ["src/**/*.test.ts"],
+      "env": { "node": true, "jest": true },
+      "plugins": ["@typescript-eslint", "eslint-plugin-jest"],
+      "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": {
+        "sourceType": "module",
+        "project": "jest.tsconfig.json"
+      },
+      "rules": {
+        "import/no-cycle": 0,
+        "linebreak-style": ["error", "windows"],
+        "import/prefer-default-export": "off"
+      }
+    },
+    {
+      "files": ["**/*.js"],
+      "extends": ["eslint:recommended", "prettier"],
+      "rules": {
+        "linebreak-style": ["error", "windows"]
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "json.schemaDownload.enable": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.tabSize": 2,
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+
+  "jestrunner.jestCommand": "npm run test --",
+  "jestrunner.debugOptions": {
+    "runtimeExecutable": "${workspaceRoot}/node_modules/.bin/react-scripts",
+    "runtimeArgs": ["test", "${fileBasename}", "--runInBand", "--no-cache", "--watchAll=false", "--color"]
+  },
+
+  "todo-tree.regex.regex": "((//|#|<!--|;|/\\*|^)\\s*($TAGS)|^//\\s*\\[x\\]|^//\\s*\\[ \\])",
+  "todo-tree.general.tags": ["TODO", "[x]", "[ ]"],
+  "todo-tree.highlights.customHighlight": {
+    "[x]": {
+      "foreground": "#64dd17",
+      "background": "#008800"
+    },
+    "[ ]": {
+      "foreground": "#f44336",
+      "background": "#592c2c"
+    }
+  }
+}
