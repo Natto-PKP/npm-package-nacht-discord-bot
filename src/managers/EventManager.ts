@@ -7,11 +7,11 @@ export type EventName = keyof ClientEvents;
 export type EventParameters<E extends EventName> = ClientEvents[E];
 
 export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName>> {
-  public override readonly name = 'events' as string;
+  public override readonly name = 'events';
 
-  public async load(path: string) {
-    if (!Explorer.exists(path)) return this;
-    const events = Explorer.list(path, { recursive: true, maxDepth: 2, extensions: ['.js', '.ts'] });
+  public async load() {
+    if (!Explorer.exists(this.path)) return this;
+    const events = Explorer.list(this.path, { recursive: true, maxDepth: 2, extensions: ['.js', '.ts'] });
 
     // Get all events folder
     await Async.parallel(events, async (event) => {
@@ -32,10 +32,10 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
           );
 
           this.add(e);
-          this.emit('load', { manager: this, self: e });
+          this.client.managers.emit('load', { manager: this, self: e, client: this.client });
         } catch (error) {
           const err = error instanceof Error ? error : new Error('Unknown error');
-          this.emit('error', { manager: this, error: err, file });
+          this.client.managers.emit('error', { manager: this, error: err, file, client: this.client });
         }
       });
     });
@@ -104,7 +104,7 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
         if (event.callback) await event.callback({ client: this.client, self: event, args });
       } catch (error) {
         const err = error instanceof Error ? error : new Error('Unknown error');
-        this.emit('error', { self: event, manager: this, error: err });
+        this.client.managers.emit('error', { manager: this, error: err, client: this.client });
       }
     };
 

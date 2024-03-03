@@ -1,18 +1,10 @@
 import { Client as DiscordClient, ClientOptions as DiscordClientOptions } from 'discord.js';
 import { Explorer } from '@natchy/utils';
 import path from 'path';
-import { EventManager } from './managers/EventManager';
+import type { EventManager } from './managers/EventManager';
+import { ManagerDirectories, Managers } from './managers/Managers';
 
-/**
- * Directories to load files from.
- */
-export interface Directories {
-  /**
-   * The directory to load events from.
-   * @default 'events'
-   */
-  events: string;
-}
+export type Directories = ManagerDirectories;
 
 export interface ClientOptions extends DiscordClientOptions {
   /**
@@ -29,13 +21,8 @@ export interface ClientOptions extends DiscordClientOptions {
 
 export class Client extends DiscordClient<true> {
   public root: string;
-
-  /**
-   * The event manager for the client.
-   */
-  public readonly events: EventManager;
-
-  private directories: Directories;
+  public managers: Managers;
+  public events: EventManager;
 
   /**
    * Create a new client.
@@ -45,14 +32,12 @@ export class Client extends DiscordClient<true> {
     super(options);
 
     this.root = Explorer.absolute(options.root ?? process.cwd());
-    this.events = new EventManager(this);
 
-    this.directories = {
+    const directories = {
       events: path.join(this.root, options.directories?.events ?? 'events'),
-    };
-  }
+    } as Directories;
 
-  public async load() {
-    await this.events.load(this.directories.events);
+    this.managers = new Managers(this, { directories });
+    this.events = this.managers.events;
   }
 }

@@ -1,139 +1,28 @@
 import { Explorer, type File } from '@natchy/utils';
 import { Collection } from 'discord.js';
 import type { Client } from '../Client';
-import { EventEmitter } from 'events';
 import { Base, type IBase } from '../structures/Base';
 
-/**
- * Events for the base manager.
- */
-export interface BaseManagerEvents<B extends Base, I extends IBase, M = BaseManager<B, I>> {
-  /**
-   * Emitted when the manager loads.
-   * @param params
-   * @returns
-   */
-  load: (params: { self: B; manager: M }) => Promise<unknown> | unknown;
-
-  /**
-   * Emitted when the manager encounters an error.
-   * @param params
-   * @returns
-   */
-  error: (params: { self?: B; manager: M; file?: File; error: Error }) => Promise<unknown> | unknown;
-
-  /**
-   * Emitted when the manager reload a item.
-   * @param params
-   * @returns
-   */
-  reload: (params: { self: B; manager: M }) => Promise<unknown> | unknown;
-
-  /**
-   * Emitted when the manager add a item.
-   * @param params
-   * @returns
-   */
-  add: (params: { self: B; manager: M }) => Promise<unknown> | unknown;
-
-  /**
-   * Emitted when the manager remove a item.
-   * @param params
-   * @returns
-   */
-  remove: (params: { self: B; manager: M }) => Promise<unknown> | unknown;
+export interface BaseManagerOptions {
+  path: string;
 }
 
 /**
  * Base manager for the client.
  */
 export abstract class BaseManager<B extends Base, I extends IBase> {
-  public abstract readonly name: string;
+  public path: string;
 
-  /**
-   * The event emitter for the manager.
-   */
-  protected readonly emitter = new EventEmitter();
+  public abstract readonly name: 'events';
 
   /**
    * Items in the manager.
    */
   public readonly collection = new Collection<string, B>();
 
-  constructor(public readonly client: Client) {
-    this.on('error', () => null);
-  }
-
-  /**
-   * Listen for events.
-   * @param event
-   * @param listener
-   * @returns
-   * @example
-   * ```ts
-   * manager.on('load', ({ self, manager }) => {
-   *  console.log(`Loaded ${self.name} in ${manager.constructor.name}`);
-   * });
-   * ```
-   */
-  public on<K extends keyof BaseManagerEvents<B, I, this>>(event: K, listener: BaseManagerEvents<B, I, this>[K]): this {
-    this.emitter.on(event, listener);
-    return this;
-  }
-
-  /**
-   * Listen for events once.
-   * @param event
-   * @param listener
-   * @returns
-   * @example
-   * ```ts
-   * manager.once('load', ({ self, manager }) => {
-   *  console.log(`Loaded ${self.name} in ${manager.constructor.name}`);
-   * });
-   * ```
-   */
-  public once<K extends keyof BaseManagerEvents<B, I, this>>(
-    event: K,
-    listener: BaseManagerEvents<B, I, this>[K]
-  ): this {
-    this.emitter.once(event, listener);
-    return this;
-  }
-
-  /**
-   * Emit events.
-   * @param event
-   * @param params
-   * @returns
-   * @example
-   * ```ts
-   * manager.emit('load', { self, manager });
-   * ```
-   */
-  public emit<K extends keyof BaseManagerEvents<B, I, this>>(
-    event: K,
-    ...params: Parameters<BaseManagerEvents<B, I, this>[K]>
-  ): boolean {
-    return this.emitter.emit(event, ...params);
-  }
-
-  /**
-   * Remove events.
-   * @param event
-   * @param listener
-   * @returns
-   * @example
-   * ```ts
-   * manager.off('load', listener);
-   * ```
-   */
-  public off<K extends keyof BaseManagerEvents<B, I, this>>(
-    event: K,
-    listener: BaseManagerEvents<B, I, this>[K]
-  ): this {
-    this.emitter.off(event, listener);
-    return this;
+  constructor(public readonly client: Client, options: BaseManagerOptions) {
+    this.path = Explorer.absolute(options.path);
+    this.client.managers.on('error', () => null);
   }
 
   /**
@@ -164,7 +53,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
 
     this.collection.delete(label);
     this.add(newItem);
-    this.emit('reload', { self: item, manager: this });
+    this.client.managers.emit('reload', { self: item, manager: this, client: this.client });
 
     return { old: item, new: newItem };
   }
@@ -178,7 +67,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
     const item = entity instanceof Base ? entity : this.from(entity);
     const label = this.getLabel(item);
     this.collection.set(label, item);
-    this.emit('add', { self: item, manager: this });
+    this.client.managers.emit('add', { self: item, manager: this, client: this.client });
 
     return item;
   }
@@ -194,7 +83,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
     if (!item) throw new Error(`Item ${label} not found`);
 
     this.collection.delete(label);
-    this.emit('remove', { self: item, manager: this });
+    this.client.managers.emit('remove', { self: item, manager: this, client: this.client });
 
     return item;
   }
