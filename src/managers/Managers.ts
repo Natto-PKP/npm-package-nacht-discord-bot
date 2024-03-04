@@ -4,6 +4,7 @@ import type { Base } from '../structures/Base';
 import { EventManager } from './EventManager';
 import { EventEmitter } from 'events';
 import type { BaseManager } from 'discord.js';
+import { EmbedManager } from './EmbedManager';
 
 type ManagerBaseParameter<B = Base, M = BaseManager> = {
   self: B;
@@ -16,17 +17,10 @@ type ManagerBaseParameter<B = Base, M = BaseManager> = {
  */
 export interface ManagerEvents {
   load: (params: ManagerBaseParameter) => Promise<unknown> | unknown;
-  'load:events': (params: ManagerBaseParameter<Event, EventManager>) => Promise<unknown> | unknown;
   error: (params: { file?: File; error: Error } & Omit<ManagerBaseParameter, 'self'>) => Promise<unknown> | unknown;
-  'error:events': (
-    params: { file?: File; error: Error } & Omit<ManagerBaseParameter<Event, EventManager>, 'self'>
-  ) => Promise<unknown> | unknown;
   reload: (params: ManagerBaseParameter) => Promise<unknown> | unknown;
-  'reload:events': (params: ManagerBaseParameter<Event, EventManager>) => Promise<unknown> | unknown;
   add: (params: ManagerBaseParameter) => Promise<unknown> | unknown;
-  'add:events': (params: ManagerBaseParameter<Event, EventManager>) => Promise<unknown> | unknown;
   remove: (params: ManagerBaseParameter) => Promise<unknown> | unknown;
-  'remove:events': (params: ManagerBaseParameter<Event, EventManager>) => Promise<unknown> | unknown;
 }
 
 /**
@@ -38,22 +32,24 @@ export interface ManagerDirectories {
    * @default 'events'
    */
   events: string;
+
+  /**
+   * The directory to load embeds from.
+   * @default 'embeds'
+   */
+  embeds: string;
 }
 
 export interface ManagersOptions {
   directories: ManagerDirectories;
+  debug?: boolean;
 }
 
 export class Managers {
-  /**
-   * The event manager for the client.
-   */
   public readonly events: EventManager;
+  public readonly embeds: EmbedManager;
 
-  /**
-   * The event emitter for the manager.
-   */
-  protected readonly emitter = new EventEmitter();
+  protected readonly emitter: EventEmitter;
 
   /**
    * Create a new client.
@@ -61,6 +57,10 @@ export class Managers {
    */
   constructor(public readonly client: Client, options: ManagersOptions) {
     this.events = new EventManager(this.client, { path: options.directories.events });
+    this.embeds = new EmbedManager(this.client, { path: options.directories.embeds });
+    this.emitter = new EventEmitter();
+
+    this.emitter.on('error', () => null);
   }
 
   /**
