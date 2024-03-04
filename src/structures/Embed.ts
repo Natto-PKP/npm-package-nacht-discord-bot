@@ -7,7 +7,9 @@ type EmbedType = 'interaction' | 'message';
 export interface IEmbed extends IBase {
   generate: <T extends EmbedType = 'message'>(
     params?: Record<string, any>
-  ) => T extends 'message' ? MessageCreateOptions : InteractionReplyOptions;
+  ) =>
+    | (T extends 'message' ? MessageCreateOptions : InteractionReplyOptions)
+    | Promise<T extends 'message' ? MessageCreateOptions : InteractionReplyOptions>;
 }
 
 export interface EmbedOptions extends BaseOptions {

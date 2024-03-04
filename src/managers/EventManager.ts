@@ -26,10 +26,13 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
           if (!data) return;
 
           // Create a new event instance and add it to the manager
-          const e =
-            data instanceof Event
-              ? data
-              : this.from({ ...data, event: data.event || (event.name as EventName) }, { file, label: file.basename });
+          let e: Event<EventName>;
+          if (!(data instanceof Event)) {
+            e = this.from(
+              { ...data, event: data.event || (event.name as EventName) },
+              { file, label: `${this.name}:${file.basename}` }
+            );
+          } else e = data;
 
           this.add(e);
           this.client.managers.emit('load', { manager: this, self: e, client: this.client });
