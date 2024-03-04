@@ -26,16 +26,18 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
           const data = await this.fetch(file);
 
           // Create a new event instance and add it to the manager
-          const e = this.from(
-            { ...data, event: data.event || (event.name as EventName) },
-            { file, label: file.basename }
-          );
+          const e =
+            data instanceof Event
+              ? data
+              : this.from({ ...data, event: data.event || (event.name as EventName) }, { file, label: file.basename });
 
           this.add(e);
           this.client.managers.emit('load', { manager: this, self: e, client: this.client });
+          if (this.debug) console.log(`Loaded ${e.label} in ${this.constructor.name}`);
         } catch (error) {
           const err = error instanceof Error ? error : new Error('Unknown error');
           this.client.managers.emit('error', { manager: this, error: err, file, client: this.client });
+          if (this.debug) console.error(err);
         }
       });
     });

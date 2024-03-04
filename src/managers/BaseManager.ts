@@ -5,6 +5,7 @@ import { Base, type IBase } from '../structures/Base';
 
 export interface BaseManagerOptions {
   path: string;
+  debug?: boolean;
 }
 
 /**
@@ -13,7 +14,9 @@ export interface BaseManagerOptions {
 export abstract class BaseManager<B extends Base, I extends IBase> {
   public path: string;
 
-  public abstract readonly name: 'events';
+  protected readonly debug: boolean;
+
+  public abstract readonly name: 'events' | 'embeds';
 
   /**
    * Items in the manager.
@@ -22,19 +25,19 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
 
   constructor(public readonly client: Client, options: BaseManagerOptions) {
     this.path = Explorer.absolute(options.path);
-    this.client.managers.on('error', () => null);
+    this.debug = options.debug ?? false;
   }
 
   /**
    * Load a file to an item.
    * @returns
    */
-  public async fetch<R = I>(file: File): Promise<R> {
+  public async fetch(file: File): Promise<B | I> {
     const absolute = Explorer.absolute(file.path);
     const content = (await Explorer.import(absolute)) as any;
     const data = content.default ?? content;
     if (!data) throw new Error(`File ${file.path} is empty`);
-    return data as R;
+    return data;
   }
 
   /**
@@ -49,7 +52,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
     if (!item.file) throw new Error(`Item ${label} has no file`);
 
     const data = await this.fetch(item.file);
-    const newItem = this.from(data);
+    const newItem = data instanceof Base ? data : this.from(data);
 
     this.collection.delete(label);
     this.add(newItem);
@@ -66,6 +69,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
   public add(entity: B | I) {
     const item = entity instanceof Base ? entity : this.from(entity);
     const label = this.getLabel(item);
+
     this.collection.set(label, item);
     this.client.managers.emit('add', { self: item, manager: this, client: this.client });
 
