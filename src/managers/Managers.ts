@@ -68,6 +68,7 @@ export class Managers {
    */
   public async load() {
     await this.events.load();
+    await this.embeds.load();
   }
 
   /**

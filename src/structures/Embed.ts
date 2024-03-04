@@ -7,7 +7,7 @@ type EmbedType = 'interaction' | 'message';
 export interface IEmbed extends IBase {
   generate: <T extends EmbedType = 'message'>(
     params?: Record<string, any>
-  ) => T extends 'interaction' ? InteractionReplyOptions : MessageCreateOptions;
+  ) => T extends 'message' ? MessageCreateOptions : InteractionReplyOptions;
 }
 
 export interface EmbedOptions extends BaseOptions {
@@ -20,7 +20,7 @@ export class Embed extends Base {
   constructor(data?: IEmbed, options?: Partial<EmbedOptions>) {
     super(data, options);
 
-    this.generate = data?.generate ?? (() => ({}));
+    this.generate = data?.generate ?? (() => ({ content: 'No generate method provided' }));
   }
 
   public setGenerate(callback: IEmbed['generate']) {
