@@ -5,7 +5,7 @@ import type { EmbedManager } from '../managers/EmbedManager';
 type EmbedType = 'interaction' | 'message';
 
 export interface IEmbed extends IBase {
-  generate: <T extends EmbedType>(
+  generate: <T extends EmbedType = 'message'>(
     params?: Record<string, any>
   ) => T extends 'interaction' ? InteractionReplyOptions : MessageCreateOptions;
 }
