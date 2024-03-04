@@ -11,11 +11,13 @@ export class EmbedManager extends BaseManager<Embed, IEmbed> {
 
   public async load() {
     if (!Explorer.exists(this.path)) return this;
-    const files = Explorer.list(this.path, { extensions: ['.js', '.ts'], type: 'file' });
+    const files = Explorer.list(this.path, { extensions: ['.js', '.ts'], flatten: true, type: 'file' });
 
     await Async.parallel(files as File[], async (file) => {
       try {
         const data = await this.fetch(file);
+        if (!data) return;
+
         const e = data instanceof Embed ? data : this.from(data, { file, label: file.basename });
 
         this.add(e);

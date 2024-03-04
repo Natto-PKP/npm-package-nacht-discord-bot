@@ -11,12 +11,11 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
 
   public async load() {
     if (!Explorer.exists(this.path)) return this;
-    const events = Explorer.list(this.path, { recursive: true, maxDepth: 2, extensions: ['.js', '.ts'] });
-
+    const events = Explorer.list(this.path, { type: 'folder' });
     // Get all events folder
     await Async.parallel(events, async (event) => {
       if (event.type !== 'folder') return;
-      const files = event.elements;
+      const files = Explorer.list(event.path, { recursive: true, flatten: true, extensions: ['.js', '.ts'] });
 
       // Get all event files within the event folder
       await Async.parallel(files, async (file) => {
@@ -24,6 +23,7 @@ export class EventManager extends BaseManager<Event<EventName>, IEvent<EventName
 
         try {
           const data = await this.fetch(file);
+          if (!data) return;
 
           // Create a new event instance and add it to the manager
           const e =

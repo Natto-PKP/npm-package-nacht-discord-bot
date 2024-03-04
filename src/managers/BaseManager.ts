@@ -36,8 +36,7 @@ export abstract class BaseManager<B extends Base, I extends IBase> {
     const absolute = Explorer.absolute(file.path);
     const content = (await Explorer.import(absolute)) as any;
     const data = content.default ?? content;
-    if (!data) throw new Error(`File ${file.path} is empty`);
-    return data;
+    return data || null;
   }
 
   /**

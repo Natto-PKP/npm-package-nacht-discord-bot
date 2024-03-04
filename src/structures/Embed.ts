@@ -6,7 +6,6 @@ type EmbedType = 'interaction' | 'message';
 
 export interface IEmbed extends IBase {
   generate: <T extends EmbedType>(
-    type?: T,
     params?: Record<string, any>
   ) => T extends 'interaction' ? InteractionReplyOptions : MessageCreateOptions;
 }
